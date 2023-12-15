@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ansim.mapper.BoardMapper">
+
+    <!-- 안심 동행 게시물 목록 보기 -->
+    <select id="selectList" parameterType="HashMap" resultType="com.ansim.dto.BoardDTO">
+        SELECT seq,seqno, user_id, title, DATE_FORMAT(regdate,'%Y-%m-%d %H:%i:%s') as regdate,
+                   content, options, departure_LATITUDE, departure_LONGITUDE,departure,destination,
+               destination_LATITUDE, destination_LONGITUDE, MEETING_TIME, hitno
+        FROM (
+        select @rownum:=@rownum+1 as seq, seqno, user_id, title, regdate,
+        content, options, departure_LATITUDE, departure_LONGITUDE,departure,destination,
+               destination_LATITUDE, destination_LONGITUDE, MEETING_TIME, hitno
+        from BRD_BOARD_TBL, (SELECT @rownum:=0) r
+        WHERE user_id LIKE CONCAT('%', #{keyword}, '%') OR
+            title LIKE CONCAT('%', #{keyword}, '%') OR
+            content LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY seqno DESC
+            ) as tbl
+        WHERE seq BETWEEN #{startPoint} AND #{endPoint}
+    </select>
+
+    <!-- 안심 동행 전체 게시물 갯수 계산 -->
+    <select id = "selectGetTotalCount" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM BRD_BOARD_TBL
+        WHERE user_id LIKE CONCAT('%', #{keyword}, '%') OR
+            title LIKE CONCAT('%', #{keyword}, '%') OR
+            content LIKE CONCAT('%', #{keyword}, '%')
+    </select>
+
+    <!--게시물 조회수 증가 -->
+    <update id="updateHitno" parameterType="int">
+        update BRD_BOARD_TBL set hitno = IFNULL((select hitno from BRD_BOARD_TBL where seqno=#{seqno}), 0) +1
+        where seqno = #{seqno}
+    </update>
+
+<!--    게시물 등록에서 POI 검색해야 한다면 필요 없을 듯?-->
+<!--    &lt;!&ndash; 출발지 목적지 표기 &ndash;&gt;-->
+<!--    <select id="selectWrite" parameterType="com.ansim.dto.BoardDTO">-->
+<!--        select departure,destination FROM BRD_BOARD_TBL-->
+<!--        where user_id = #{user_id}-->
+<!--        ORDER BY insert_timestamp DESC-->
+<!--            LIMIT 1;-->
+<!--    </select>-->
+
+    <!-- 게시물 등록 하기 -->
+    <insert id="insertWrite" parameterType="com.ansim.dto.BoardDTO">
+        insert into BRD_BOARD_TBL (user_id,options,title,content, regdate,
+                                   departure,destination, departure_LATITUDE,
+                                   departure_LONGITUDE, destination_LATITUDE,
+                                   destination_LONGITUDE) values
+            (#{user_id},#{options},#{title},#{content}, #{regdate},
+            #{departure},#{destination},#{departure_LATITUDE},
+             #{departure_LONGITUDE},#{destination_LATITUDE},#{destination_LONGITUDE})
+    </insert>
+
+    <!-- 게시물 내용 보기 -->
+    <select id="selectView" parameterType="int" resultType="com.ansim.dto.BoardDTO">
+        select BRD_BOARD_TBL.seqno, BRD_BOARD_TBL.user_id, BRD_BOARD_TBL.title,
+               to_char(regdate,'YYYY-MM-DD HH24:MI:SS') as BRD_BOARD_TBL.regdate,BRD_BOARD_TBL.content,
+               BRD_BOARD_TBL.options, BRD_BOARD_TBL.departure_LATITUDE, BRD_BOARD_TBL.departure_LONGITUDE,
+               BRD_BOARD_TBL.departure,BRD_BOARD_TBL.destination, BRD_BOARD_TBL.destination_LATITUDE,
+               BRD_BOARD_TBL.destination_LONGITUDE, BRD_BOARD_TBL.MEETING_TIME,
+               MEM_INFO_TBL.stored_file_nm, MEM_INFO_TBL.user_nm, MEM_INFO_TBL.age,
+               MEM_INFO_TBL.gender, MEM_INFO_TBL.mbti, MEM_INFO_TBL.ansim_cnt
+                from BRD_BOARD_TBL
+                inner join MEM_INFO_TBL on BRD_BOARD_TBL.user_id = MEM_INFO_TBL.user_id
+                where BRD_BOARD_TBL.seqno=#{seqno}
+    </select>
+
+    <!-- 게시물 내용 이전 보기 -->
+    <select id="selectPre_seqno" parameterType="HashMap" resultType="int">
+		<![CDATA[
+        <![CDATA[
+        SELECT IFNULL(MAX(seqno), 0) AS pre_seqno
+        FROM BRD_BOARD_TBL
+        WHERE seqno < #{seqno}
+          AND (user_id LIKE CONCAT('%', #{keyword}, '%') OR title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%'));
+        ]]>
+	</select>
+
+    <!-- 게시물 내용 다음 보기 -->
+    <select id="selectNext_seqno" parameterType="HashMap" resultType="int">
+		 <![CDATA[
+        SELECT IFNULL(min(seqno), 0) AS next_seqno
+        FROM BRD_BOARD_TBL
+        WHERE seqno > #{seqno}
+          AND (user_id LIKE CONCAT('%', #{keyword}, '%') OR title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%'));
+    ]]>
+	</select>
+
+    <!-- 게시물 삭제 하기 -->
+    <delete id="deleteBoard" parameterType="int">
+        delete from BRD_BOARD_TBL where seqno=#{seqno}
+    </delete>
+
+</mapper>

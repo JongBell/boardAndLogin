@@ -5,8 +5,9 @@
   <title>로그인</title>
   <link rel="stylesheet" href="/css/index.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
-
   <script src="/script/login.js"></script>
+  <script type="text/javascript" src="https://static.nid.naver.com/js/naverLogin_implicit-1.0.3.js" charset="utf-8"></script>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
 
 </head>
 <body>
@@ -43,8 +44,22 @@
          onMouseout="this.style.background='white'; this.style.textDecoration='none';">비밀번호 찾기</a> ]
 
     </div><br>
+    <!-- 네이버 로그인 버튼 노출 영역 -->
+    <div id="naver_id_login"></div>
+    <!-- //네이버 로그인 버튼 노출 영역 -->
+    <script type="text/javascript">
+      var naver_id_login = new naver_id_login(
+              "0DtgBMLXkGD_MLl4CrR1",
+              "http://www.localhost:8080/guide/map"
+      );
+      var state = naver_id_login.getUniqState();
+      naver_id_login.setButton("white", 2, 40);
+      naver_id_login.setDomain(".localhost.com");
+      naver_id_login.setState(state);
+      naver_id_login.setPopup();
+      naver_id_login.init_naver_id_login();
+    </script>
   </div>
 </div><br><br>
-
 </body>
 </html>
