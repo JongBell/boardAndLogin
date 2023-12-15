@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ansim.mapper.MarkerMapper">
+
+    <!-- cctv coordinate -->
+    <select id="cctv" resultType="com.ansim.dto.CctvDTO">
+        select latitude, longitude from tbl_cctv
+    </select>
+
+    <!-- cctv coordinate -->
+    <select id="delibox" resultType="com.ansim.dto.DeliboxDTO">
+        select latitude, longitude from tbl_delibox
+    </select>
+
+    <!-- cctv coordinate -->
+    <select id="emergbell" resultType="com.ansim.dto.EmergbellDTO">
+        select latitude, longitude from tbl_emergbell
+    </select>
+
+</mapper>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>게시물 상세보기</title>
+
+    <style>
+        .main{
+            text-align: center;
+        }
+
+        body, ul, li {
+            list-style: none;
+        }
+
+        /* 사이드바 시작 */
+
+        /* 사이드바 하단에 나올 리스트들이 마우스 */
+        /* 갔다대면 우측에 나올 것이므로 안 보이게 */
+        .side-bar > ul ul {
+            display: none;
+        }
+
+        /* 사이드바의 너비와 높이를 변수를 통해 통제 */
+        :root {
+            --side-bar-width: 270px;
+            --side-bar-height: 90vh;
+        }
+
+        .side-bar {
+            position: fixed;    /* 스크롤을 따라오도록 지정 */
+            background-color: black;
+            width: var(--side-bar-width);
+            min-height: var(--side-bar-height);   /* 사이드바의 높이를 전체 화면 높이의 90%로 지정 */
+            margin-top: calc((100vh - var(--side-bar-height)) / 2);    /* 사이드바 위와 아래의 마진을 동일하게 지정 */
+        }
+
+        /* 아이콘 시작 */
+        .side-bar__icon-box {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .side-bar__icon-1 {
+            position: relative;
+            width: 23px;
+            height: 17px;
+            margin: 15px;
+            margin-top: 20px;
+            transition: .5s;
+        }
+
+        :root {
+            --side-bar__icon: .5s;
+        }
+
+        .side-bar__icon-1 > div {
+            position: absolute;
+            width: 100%;
+            height: 20%;
+            background-color: white;
+            transition: all var(--side-bar__icon);
+        }
+
+        .side-bar__icon-1 > div:nth-of-type(1) {
+            top: 0;
+            width: auto;
+            left: 0;
+            right: 0;
+            transition: all var(--side-bar__icon), left calc(var(--side-bar__icon) / 2) calc(var(--side-bar__icon) / 2), right calc(var(--side-bar__icon) / 2) calc(var(--side-bar__icon) / 2), height calc(var(--side-bar__icon) / 2) 0s;
+        }
+
+        .side-bar__icon-1 > div:nth-of-type(2) {
+            top: 40%;
+            transform-origin:bottom left;
+        }
+
+        .side-bar__icon-1 > div:nth-of-type(3) {
+            top: 80%;
+            left: auto;
+            right: 0;
+            transform-origin:bottom right;
+        }
+
+
+        .side-bar:hover .side-bar__icon-1 {
+            transform: translate(-198px, 0);
+        }
+
+        .side-bar:hover .side-bar__icon-1 > div:nth-of-type(2) {
+            transform:rotate(45deg);
+            width: 70.5%;
+            height: 25%;
+        }
+
+        .side-bar:hover .side-bar__icon-1 > div:nth-of-type(3) {
+            top: 40%;
+            transform:rotate(-45deg);
+            width: 70.5%;
+            height: 25%;
+        }
+
+        .side-bar:hover .side-bar__icon-1 > div:nth-of-type(1) {
+            left: 41%;
+            right: 41%;
+            height: 100%;
+            transition: all var(--side-bar__icon), left calc(var(--side-bar__icon) / 2) 0s, right calc(var(--side-bar__icon) / 2) 0s, height calc(var(--side-bar__icon) / 2) calc(var(--side-bar__icon) / 2);
+        }
+        /* 아이콘 끝 */
+
+        /* 모든 메뉴의 a에 속성값 부여 */
+        .side-bar ul > li > a {
+            display: block;
+            color: white;
+            font-size: 1.4rem;
+            font-weight: bold;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            padding-left: 50px;
+            transition: .5s;
+        }
+
+        /* 자식의 position이 absolute일 때 자식을 영역 안에 가두어 준다 */
+        .side-bar > ul > li {
+            position: relative;
+        }
+
+        /* 모든 메뉴가 마우스 인식 시 반응 */
+        .side-bar ul > li:hover > a {
+            background-color: #555;
+            border-bottom: 1px solid #999;
+        }
+
+        /* 1차 메뉴의 항목이 마우스 인식 시에 2차 메뉴 등장 */
+        .side-bar > ul > li:hover > ul {
+            display: block;
+            position: absolute;
+            background-color: #888;
+            top: 0;         /* 2차 메뉴의 상단을 1차 메뉴의 상단에 고정 */
+            left: 100%;     /* 2차 메뉴를 1차 메뉴의 너비만큼 이동 */
+            width: 100%;    /* 1차 메뉴의 너비를 상속 */
+        }
+
+        /* 사이드바 너비의 80%만큼 왼쪽으로 이동 */
+        .side-bar {
+            border-radius: 20px;
+            transform: translate(calc(var(--side-bar-width) * -0.8), 0);
+            transition: .5s;
+        }
+
+        /* 마우스 인식 시 원래의 위치로 이동 */
+        .side-bar:hover {
+            transform: translate(-20px, 0);   /* 둥근 모서리의 너비만큼 숨겨주기 */
+        }
+        /* 사이드바 끝 */
+
+        .footer {
+            grid-area: footer;
+            border-top: 1px solid black;
+            padding: 1rem;
+            width: 100%;
+            text-align: center;
+        }
+
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            gap: 1rem;
+            width: 70%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .top,
+        .bottom {
+            display: flex;
+            height: calc(50% - 0.5rem);
+            gap: 1rem;
+        }
+
+        .image {
+            flex: 1;
+            border-bottom: 2px solid #adadad;
+        }
+
+        .detail {
+            display: flex;
+            flex-direction: column;
+            flex: 3;
+            gap: 1rem;
+        }
+
+        .sub-detail-title {
+            display: flex;
+            flex: 1;
+            gap: 1rem;
+            border-bottom: 2px solid #adadad;
+        }
+
+        .sub-detail {
+            display: flex;
+            flex: 1;
+            gap: 1rem;
+        }
+
+        .left {
+            flex: 1;
+            border-bottom: 2px solid #adadad;
+        }
+
+        .right {
+            flex: 1;
+            border-bottom: 2px solid #adadad;
+        }
+
+        .map {
+            flex: 1;
+            border: 1px solid black;
+        }
+
+        .info {
+            flex: 2;
+            border-top: 2px solid #adadad;
+            border-bottom: 2px solid #adadad;
+        }
+
+        .bottom_menu{
+            margin-top: 20px;
+        }
+        .bottom_menu > a:link, .bottom_menu .a:visited{
+            background-color: #FFA500;
+            color: maroon;
+            padding: 15px 25px;
+            text-align: center;
+            display: inline-block;
+            text-decoration: none;
+        }
+        .bottom_menu > a:hover, .bottom_menu > a:active{
+            background-color: #1E90FF;
+            text-decoration: none;
+        }
+    </style>
+
+    <script>
+        // 게시물 삭제
+        function boardDelete(){
+            if(confirm("정말 삭제하시겠습니까")==true)document.location.href='/board/delete?seqno=[[${view.seqno}]]'; //get방식으로 지울것을 설정
+        }
+
+        const startupPage = async () => { // 결과적으로는 window.onload랑 같은 방법, 밑에 바디태그 온로드를 이 이름으로 넣어줌.
+            const data = {seqno: parseInt('[[${view.seqno}]]')};
+
+            await fetch('/board/reply?option=L', {
+                method : 'POST',
+                headers : {"content-type":"application/json"},
+                body : JSON.stringify(data) // JSON으로 변환
+            }).then((response) => response.json())
+                .then((data) => {
+                    if(data.view.stored_file_nm === 'NULL') {
+                        alert('사진을 먼저 등록해주세요.');
+                        document.location.href = '/#'; //
+                    } else {
+                        replyList(data);
+                    }
+                })
+                .catch((error) => {
+                    console.log("error = " + error);
+                    alert("시스템 장애로 댓글 불러오기에 실패했습니다.");
+                });
+        }
+
+    </script>
+
+</head>
+<body>
+
+<!-- 바디 태그 안에 onload="startupPage()" 이걸 넣지 않으려면 이렇게 스크립트 태그 안에 따로 넣어줘도 됨. startupPage() 이거는 위에 정의해야 함!   -->
+<script>
+    startupPage();
+
+    // const userid = '[[${session.userid}]]';
+    // if(userid.length == 0) {
+    //     document.location.href='/';
+    // }
+</script>
+
+<div class="main">
+    <aside class="side-bar">
+        <section class="side-bar__icon-box">
+            <section class="side-bar__icon-1">
+                <div></div>
+                <div></div>
+                <div></div>
+            </section>
+        </section>
+        <ul>
+            <li>
+                <a href="#"><i class="fa-solid fa-cat"></i> menu1</a>
+                <ul>
+                    <li><a href="#">text1</a></li>
+                    <li><a href="#">text2</a></li>
+                    <li><a href="#">text3</a></li>
+                    <li><a href="#">text4</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">menu2</a>
+                <ul>
+                    <li><a href="#">text1</a></li>
+                    <li><a href="#">text2</a></li>
+                    <li><a href="#">text3</a></li>
+                    <li><a href="#">text4</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">menu3</a>
+                <ul>
+                    <li><a href="#">text1</a></li>
+                    <li><a href="#">text2</a></li>
+                    <li><a href="#">text3</a></li>
+                    <li><a href="#">text4</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">menu4</a>
+                <ul>
+                    <li><a href="#">text1</a></li>
+                    <li><a href="#">text2</a></li>
+                    <li><a href="#">text3</a></li>
+                    <li><a href="#">text4</a></li>
+                </ul>
+            </li>
+        </ul>
+    </aside>
+<!--    <img src="/images/logo.jpg" class="topBanner" id="topBanner"><br>-->
+    <h1 style="text-align: center;">게시물 상세보기</h1>
+    <br>
+    <div class="container">
+        <div class="top">
+            <div class="image">
+                <img th:src="@{'/profile/' + ${view.stored_file_nm}}" style="display:block;width:80%;height:auto;margin:auto">
+            </div>
+            <div class="detail">
+                <div class="sub-detail-title">[[${view.title}]]</div>
+                <div class="sub-detail">
+                    <div class="left">[[${view.departure}]]</div>
+                    <div class="right">[[${view.destination}]]</div>
+                </div>
+                <div class="sub-detail">
+                    <div class="left">[[${view.MEETING_TIME}]]</div>
+                    <div class="right">[[${view.memcnt}]]</div>
+                </div>
+                <div class="sub-detail">
+                    <div class="left">[[${view.gender}]]</div>
+                    <div class="right">[[${view.sound}]]</div>
+                </div>
+            </div>
+        </div>
+        <div class="bottom">
+            <div class="map">지도</div>
+            <div class="info">[[${view.content}]]</div>
+        </div>
+    </div>
+    <br>
+
+    <div class="bottom_menu">
+        <th:block th:if="${pre_seqno != 0}">
+            <a th:href="@{'/board/view?seqno=' + ${pre_seqno} + '&page=' + ${page} + '&keyword=' + ${keyword}}">이전 글▼</a>&nbsp;&nbsp;
+        </th:block>
+        <a th:href="@{'/board/list?page=' + ${page} + '&keyword=' + ${keyword}}">목록가기</a>&nbsp;&nbsp;
+        <th:block th:if="${next_seqno != 0}">
+            <a th:href="@{'/board/view?seqno=' + ${next_seqno} + '&page=' + ${page} + '&keyword=' + ${keyword}}">다음 글▲</a>&nbsp;&nbsp;
+        </th:block>
+        <a href="/board/write">글 작성</a>&nbsp;&nbsp;
+        <th:block th:if="${session.user_id == view.user_id || session.role == 'MASTER'}">
+            <a th:href="@{'/board/modify?seqno=' + ${view.seqno} + '&page=' + ${page} + '&keyword=' + ${keyword}}">글 수정</a>&nbsp;&nbsp;
+            <a href="javascript:boardDelete()">글 삭제</a>
+        </th:block>
+    </div>
+
+    <div class="footer">
+        Footer Content
+    </div>
+
+</div>
+</body>
+</html>

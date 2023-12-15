@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시물 등록</title>
+    <style>
+
+        .main{
+            text-align: center;
+        }
+
+        body, ul, li {
+            list-style: none;
+        }
+
+        /* 사이드바 시작 */
+
+        /* 사이드바 하단에 나올 리스트들이 마우스 */
+        /* 갔다대면 우측에 나올 것이므로 안 보이게 */
+        .side-bar > ul ul {
+            display: none;
+        }
+
+        /* 사이드바의 너비와 높이를 변수를 통해 통제 */
+        :root {
+            --side-bar-width: 270px;
+            --side-bar-height: 90vh;
+        }
+
+        .side-bar {
+            position: fixed;    /* 스크롤을 따라오도록 지정 */
+            background-color: black;
+            width: var(--side-bar-width);
+            min-height: var(--side-bar-height);   /* 사이드바의 높이를 전체 화면 높이의 90%로 지정 */
+            margin-top: calc((100vh - var(--side-bar-height)) / 2);    /* 사이드바 위와 아래의 마진을 동일하게 지정 */
+        }
+
+        /* 아이콘 시작 */
+        .side-bar__icon-box {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .side-bar__icon-1 {
+            position: relative;
+            width: 23px;
+            height: 17px;
+            margin: 15px;
+            margin-top: 20px;
+            transition: .5s;
+        }
+
+        :root {
+            --side-bar__icon: .5s;
+        }
+
+        .side-bar__icon-1 > div {
+            position: absolute;
+            width: 100%;
+            height: 20%;
+            background-color: white;
+            transition: all var(--side-bar__icon);
+        }
+
+        .side-bar__icon-1 > div:nth-of-type(1) {
+            top: 0;
+            width: auto;
+            left: 0;
+            right: 0;
+            transition: all var(--side-bar__icon), left calc(var(--side-bar__icon) / 2) calc(var(--side-bar__icon) / 2), right calc(var(--side-bar__icon) / 2) calc(var(--side-bar__icon) / 2), height calc(var(--side-bar__icon) / 2) 0s;
+        }
+
+        .side-bar__icon-1 > div:nth-of-type(2) {
+            top: 40%;
+            transform-origin:bottom left;
+        }
+
+        .side-bar__icon-1 > div:nth-of-type(3) {
+            top: 80%;
+            left: auto;
+            right: 0;
+            transform-origin:bottom right;
+        }
+
+
+        .side-bar:hover .side-bar__icon-1 {
+            transform: translate(-198px, 0);
+        }
+
+        .side-bar:hover .side-bar__icon-1 > div:nth-of-type(2) {
+            transform:rotate(45deg);
+            width: 70.5%;
+            height: 25%;
+        }
+
+        .side-bar:hover .side-bar__icon-1 > div:nth-of-type(3) {
+            top: 40%;
+            transform:rotate(-45deg);
+            width: 70.5%;
+            height: 25%;
+        }
+
+        .side-bar:hover .side-bar__icon-1 > div:nth-of-type(1) {
+            left: 41%;
+            right: 41%;
+            height: 100%;
+            transition: all var(--side-bar__icon), left calc(var(--side-bar__icon) / 2) 0s, right calc(var(--side-bar__icon) / 2) 0s, height calc(var(--side-bar__icon) / 2) calc(var(--side-bar__icon) / 2);
+        }
+        /* 아이콘 끝 */
+
+        /* 모든 메뉴의 a에 속성값 부여 */
+        .side-bar ul > li > a {
+            display: block;
+            color: white;
+            font-size: 1.4rem;
+            font-weight: bold;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            padding-left: 50px;
+            transition: .5s;
+        }
+
+        /* 자식의 position이 absolute일 때 자식을 영역 안에 가두어 준다 */
+        .side-bar > ul > li {
+            position: relative;
+        }
+
+        /* 모든 메뉴가 마우스 인식 시 반응 */
+        .side-bar ul > li:hover > a {
+            background-color: #555;
+            border-bottom: 1px solid #999;
+        }
+
+        /* 1차 메뉴의 항목이 마우스 인식 시에 2차 메뉴 등장 */
+        .side-bar > ul > li:hover > ul {
+            display: block;
+            position: absolute;
+            background-color: #888;
+            top: 0;         /* 2차 메뉴의 상단을 1차 메뉴의 상단에 고정 */
+            left: 100%;     /* 2차 메뉴를 1차 메뉴의 너비만큼 이동 */
+            width: 100%;    /* 1차 메뉴의 너비를 상속 */
+        }
+
+        /* 사이드바 너비의 80%만큼 왼쪽으로 이동 */
+        .side-bar {
+            border-radius: 20px;
+            transform: translate(calc(var(--side-bar-width) * -0.8), 0);
+            transition: .5s;
+        }
+
+        /* 마우스 인식 시 원래의 위치로 이동 */
+        .side-bar:hover {
+            transform: translate(-20px, 0);   /* 둥근 모서리의 너비만큼 숨겨주기 */
+        }
+        /* 사이드바 끝 */
+
+        .footer {
+            grid-area: footer;
+            border-top: 1px solid black;
+            padding: 1rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        .WriteForm{
+            width: 60%;
+            height: auto;
+            margin: auto;
+            padding: 20px;
+            background-color: #FFFFFF;
+            text-align: center;
+            border: 4px solid gray;
+            border-radius: 30px;
+        }
+        .items{
+            width: 90%;
+            border: none;
+            border-bottom: 2px solid gray;
+            padding: 10px 10px;
+            outline: none;
+            color: #636e72;
+            height: 25px;
+            background: none;
+        }
+        #content{
+            width: 90%;
+            height: 300px;
+            box-sizing: border-box;
+            border: solid gray;
+            font-size: 16px;
+            resize: both;
+        }
+
+        .btn_delete {
+            display: inline-block;
+            width: 15%;
+            cursor: pointer;
+            vertical-align: top;
+        }
+
+        .btn_write{
+            position: relative;
+            margin: 20px;
+            margin-bottom: 10px;
+            height: 40px;
+            width: 40%;
+            background: red;
+            color: white;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            display: inline;
+        }
+        .btn_cancel{
+            position: relative;
+            margin: 20px;
+            margin-bottom: 10px;
+            height: 40px;
+            width: 40%;
+            background: pink;
+            background-size: 200%;
+            color: white;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            display: inline;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .left-section, .right-section {
+            width: 45%; /* 이 값을 조절하여 두 섹션의 너비를 변경할 수 있습니다. */
+        }
+
+        </style>
+
+    <script>
+        const registerForm = async () => {
+
+            const title = document.querySelector('#title')
+            const dateInput = document.getElementsByName('datetime')[0]; // 날짜
+            const timeInput = document.getElementsByName('datetime')[1]; // 시간
+            const memcnt = document.querySelector('select[name=memcnt] option:checked'); // 인원수
+            const gender = document.querySelectorAll('input[name=gender]:checked'); // 성별
+            const sound = document.querySelectorAll('input[name=sound]:checked'); // 성별
+            const content = document.querySelector('#content')
+
+            // 필수값 등록시 값 입력 여부 확인
+            if(title.value === ''){
+                alert('제목을 입력하세요!!');
+                title.focus();
+                return false;
+            }
+
+            if (!dateInput.value) {
+                alert('날짜를 체크하세요!!');
+                datetime.focus();
+                return false;
+            }
+            if (!timeInput.value) {
+                alert('시간을 체크하세요!!');
+                datetime.focus();
+                return false;
+            }
+
+            if (!memcnt.value) {
+                alert('동행할 최대 인원을 선택하세요!!');
+                memcnt.focus();
+                return false;
+            }
+
+            if (!gender.value) {
+                alert('동행원의 성별을 고르세요!!');
+                gender.focus();
+                return false;
+            }
+
+            if (!sound.value) {
+                alert('동행 지침을 고르세요!!');
+                sound.focus();
+                return false;
+            }
+
+            if(content.value === ''){
+                alert('내용을 입력하세요!!');
+                content.focus();
+                return false;
+            }
+
+            options.value = memcnt.value + ',' + gender.value + ',' + sound.value;
+
+                let formData = new FormData(WriteForm);
+
+            let uploadURL = "/board/write";
+
+            await fetch(uploadURL, {
+                method: 'POST',
+                body: formData
+            }) .then((response) => response.json())
+                .then((data) => {
+                    if(data.message === 'GOOD') {
+                        alert("게시물이 등록되었습니다.");
+                        document.location.href="/board/list?page=1";
+                    }
+                }).catch((error) => {
+                    alert("시스템 장애로 게시물 등록에 실패했습니다.");
+                    console.log("error" + error);
+                })
+        }
+    </script>
+</head>
+<body>
+
+<!--<script>-->
+<!--    const user_id = '[[${session.user_id}]]';-->
+<!--    if(user_id.length == 0) {-->
+<!--        document.location.href='/';-->
+<!--    }-->
+<!--</script>-->
+
+<div class="main">
+    <aside class="side-bar">
+        <section class="side-bar__icon-box">
+            <section class="side-bar__icon-1">
+                <div></div>
+                <div></div>
+                <div></div>
+            </section>
+        </section>
+        <ul>
+            <li>
+                <a href="#"><i class="fa-solid fa-cat"></i> menu1</a>
+                <ul>
+                    <li><a href="#">text1</a></li>
+                    <li><a href="#">text2</a></li>
+                    <li><a href="#">text3</a></li>
+                    <li><a href="#">text4</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">menu2</a>
+                <ul>
+                    <li><a href="#">text1</a></li>
+                    <li><a href="#">text2</a></li>
+                    <li><a href="#">text3</a></li>
+                    <li><a href="#">text4</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">menu3</a>
+                <ul>
+                    <li><a href="#">text1</a></li>
+                    <li><a href="#">text2</a></li>
+                    <li><a href="#">text3</a></li>
+                    <li><a href="#">text4</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">menu4</a>
+                <ul>
+                    <li><a href="#">text1</a></li>
+                    <li><a href="#">text2</a></li>
+                    <li><a href="#">text3</a></li>
+                    <li><a href="#">text4</a></li>
+                </ul>
+            </li>
+        </ul>
+    </aside>
+<!--    <img src="/images/logo.jpg" class=topBanner><br>-->
+    <h1>게시물 등록</h1>
+    <br>
+    <div id="formZone">
+        <form class="WriteForm" id="WriteForm" name="WriteForm" method="post">
+            <input type="text" id="title" class="items" name="title" placeholder="제목을 입력하세요."><br><br>
+            <div class="container">
+                <div class="left-section">
+                    <input type="text" id="departure" class="items" name="departure" th:value='${session.departure}' disabled>
+                </div>
+                <div class="right-section">
+                    <input type="text" id="destination" class="items" name="destination" th:value='${session.destination}' disabled>
+                </div>
+            </div>
+            <div class="container">
+                <div class="left-section">
+                    <div class="date-time-selector" name="datetime">
+                        <label for="date">날짜:</label>
+                        <input type="date" id="date" />
+                        <label for="time">시간:</label>
+                        <input type="time" id="time" />
+                    </div>
+                </div>
+                <div class="right-section">
+                    인원수 :
+                    <select name="memcnt">
+                        <option value = "all" disabled selected>-- 아래의 내용 중에서 선택 --</option>
+                        <option value="1">1명</option>
+                        <option value="2">2명</option>
+                        <option value="3">3명</option>
+                        <option value="4">4명</option>
+                    </select>
+                </div>
+            </div>
+            <div class="container">
+                <div class="left-section">
+                    성별 :
+                    <label><input type="radio" name="gender" value="남성">남성</label>
+                    <label><input type="radio" name="gender" value="여성">여성</label>
+                    <label><input type="radio" name="gender" value="FTM">FTM</label>
+                    <label><input type="radio" name="gender" value="MTF">MTF</label>
+                    <label><input type="radio" name="gender" value="상관없음">상관없음</label>
+                </div>
+                <div class="right-section">
+                    대화 :
+                    <label><input type="radio" name="sound" value="조용히">조용히</label>
+                    <label><input type="radio" name="sound" value="상관없음">상관없음</label>
+                </div>
+            </div>
+            <textarea name="content" id="content" cols="100" rows="500" placeholder="내용을 입력하세요"></textarea>
+
+            <input type="hidden" name="userid" th:value="${session.user_id}"></input>
+            <input type="hidden" name="options"></input>
+            <input type="hidden" name="departure_LATITUDE" th:value="${departure_LATITUDE}"></input>
+            <input type="hidden" name="departure_LONGITUDE" th:value="${departure_LONGITUDE}"></input>
+            <input type="hidden" name="destination_LATITUDE" th:value="${destination_LATITUDE}"></input>
+            <input type="hidden" name="destination_LONGITUDE" th:value="${destination_LONGITUDE}"></input>
+            <br><br>
+
+            <input type="button" class="btn_write"  value="등록" onclick="return registerForm();">
+            <input type="button" class="btn_cancel"  value="취소" onclick="history.back()">
+        </form>
+    </div>
+    <div class="footer">
+        Footer Content
+    </div>
+    <br><br>
+</div>
+
+</body>
+</html>
